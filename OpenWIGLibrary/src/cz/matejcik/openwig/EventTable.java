@@ -6,6 +6,8 @@ import se.krka.kahlua.vm.*;
 import java.io.*;
 
 public class EventTable implements LuaTable, Serializable {
+	
+	private boolean isDeserialization = false;
 
 	public LuaTable table = new LuaTableImpl();
 
@@ -36,7 +38,9 @@ public class EventTable implements LuaTable, Serializable {
 	}
 
 	public void deserialize (DataInputStream in) throws IOException {
+		isDeserialization = true;
 		Engine.instance.savegame.restoreValue(in, this);
+		isDeserialization = false;
 		//setTable(table);
 	}
 	
@@ -104,6 +108,7 @@ public class EventTable implements LuaTable, Serializable {
 	}
 	
 	public void callEvent(String name, Object param) {
+		if (isDeserialization) return;
 		try {
 			Object o = table.rawget(name);
 			if (o instanceof LuaClosure) {
